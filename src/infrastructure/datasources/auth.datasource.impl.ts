@@ -1,3 +1,4 @@
+import { UserModel } from "@data/mongodb/models/user.model.js";
 import { AuthDatasource } from "@domain/datasources/auth.datasource.js";
 import { RegisterUserDto } from "@domain/dtos/auth/register-user.dtos.js";
 import { UserEntity } from "@domain/entities/user.entity.js";
@@ -7,28 +8,40 @@ import { CustomError } from "@domain/errors/custom.error.js";
 
 
 export class AuthDatasourceImpl implements AuthDatasource {
-   async register(registerUserDto: RegisterUserDto): Promise<UserEntity> {
+    async register(registerUserDto: RegisterUserDto): Promise<UserEntity> {
 
         const { email, password, name } = registerUserDto;
+
         try {
 
             // 1. verificar si el correo ya existe
+            const exists = await UserModel.findOne({ email })
+            if (exists) throw CustomError.badRequest('user already exists');
 
 
-            // 2 . hashear la contraseña
+             // 2 . hashear la contraseña
+
+            const user = await UserModel.create({
+                name,
+                email,
+                password,
+            });
+
+
+           await user.save();
 
 
             // 3 mappear la respuesta a una entidad
 
-            
+            //todo falta un mapper
             return new UserEntity(
-                '1',
+                user.id,
                 email,
                 name,
                 password,
-                ['ADMIN_ROLE'],
+                user.roles,
             );
-            
+
         } catch (error) {
             if (error instanceof Error) {
                 throw error;
@@ -38,5 +51,5 @@ export class AuthDatasourceImpl implements AuthDatasource {
         }
         //throw new Error("Method not implemented.");
     }
-    
+
 }
