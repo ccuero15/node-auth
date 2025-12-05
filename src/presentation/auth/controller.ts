@@ -1,9 +1,11 @@
 import { JwtAdapter } from "@config/jwt.js"
 import { UserModel } from "@data/mongodb/models/user.model.js"
+import { LoginUserDto } from "@domain/dtos/auth/login-user.dto.js"
 import { RegisterUserDto } from "@domain/dtos/auth/register-user.dtos.js"
 import { CustomError } from "@domain/errors/custom.error.js"
 import { AuthRepository } from "@domain/repositories/auth.repository.js"
-import { RegisterUser } from "@domain/use-cases/auth/login-user.use-case.js"
+import { LoginUser } from "@domain/use-cases/auth/login-user.use-case.js"
+import { RegisterUser } from "@domain/use-cases/auth/register-user.use-case.js"
 import { Request, Response } from "express"
 
 export class AuthController {
@@ -25,7 +27,7 @@ export class AuthController {
 
         if (error) return res.status(400).json({ error })
 
-            //! no se hace desde el repositorio si no del use case 
+        //! no se hace desde el repositorio si no del use case 
         /*  
         this.authRepository.register(registerUserDto!).then(async (user) => {
              res.json({
@@ -40,11 +42,19 @@ export class AuthController {
         new RegisterUser(this.authRepository)
             .execute(registerUserDto!)
             .then(data => res.json(data))
-            .catch(err => this.handleError(err,res))
+            .catch(err => this.handleError(err, res))
     }
 
     loginUser = async (req: Request, res: Response) => {
-        res.json('registerUser Controller')
+
+        const [ error, loginUserDto ] = LoginUserDto.create(req.body)
+        if (error) return res.status(400).json({ error })
+
+        new LoginUser(this.authRepository)
+            .execute(loginUserDto!)
+            .then(data => res.json(data))
+            .catch(err => this.handleError(err, res))
+        //res.json('registerUser Controller')
     }
 
 
