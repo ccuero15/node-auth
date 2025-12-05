@@ -3,6 +3,7 @@ import { UserModel } from "@data/mongodb/models/user.model.js"
 import { RegisterUserDto } from "@domain/dtos/auth/register-user.dtos.js"
 import { CustomError } from "@domain/errors/custom.error.js"
 import { AuthRepository } from "@domain/repositories/auth.repository.js"
+import { RegisterUser } from "@domain/use-cases/auth/login-user.use-case.js"
 import { Request, Response } from "express"
 
 export class AuthController {
@@ -24,15 +25,22 @@ export class AuthController {
 
         if (error) return res.status(400).json({ error })
 
+            //! no se hace desde el repositorio si no del use case 
+        /*  
         this.authRepository.register(registerUserDto!).then(async (user) => {
-            res.json({
-                user,
-                token: await JwtAdapter.generateToken({ id: user.id })
-            })
-            //res.json(user)
-        }).catch(err => this.handleError(err, res))
-
+             res.json({
+                 user,
+                 token: await JwtAdapter.generateToken({ id: user.id })
+             })
+             //res.json(user)
+         }).catch(err => this.handleError(err, res))
+         */
         //res.json(registerUserDto)
+
+        new RegisterUser(this.authRepository)
+            .execute(registerUserDto!)
+            .then(data => res.json(data))
+            .catch(err => this.handleError(err,res))
     }
 
     loginUser = async (req: Request, res: Response) => {
