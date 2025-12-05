@@ -4,6 +4,7 @@ import { AuthDatasource } from "@domain/datasources/auth.datasource.js";
 import { RegisterUserDto } from "@domain/dtos/auth/register-user.dtos.js";
 import { UserEntity } from "@domain/entities/user.entity.js";
 import { CustomError } from "@domain/errors/custom.error.js";
+import { UserMapper } from "@infrastructure/mappers/user.mapper.js";
 
 
 type HashFunction = (password: string) => string;
@@ -44,14 +45,8 @@ export class AuthDatasourceImpl implements AuthDatasource {
 
             // 3 mappear la respuesta a una entidad
 
-            //todo falta un mapper
-            return new UserEntity(
-                user.id,
-                email,
-                name,
-                user.password,
-                user.roles,
-            );
+            //todo mapper de objeto a entidad
+            return UserMapper.userEntityFromObject(user);
 
         } catch (error) {
             if (error instanceof Error) {
