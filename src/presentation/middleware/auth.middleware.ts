@@ -1,3 +1,5 @@
+import { JwtAdapter } from "@config/jwt.js";
+import { UserModel } from "@data/mongodb/models/user.model.js";
 import { NextFunction, Request, Response } from "express";
 
 
@@ -7,7 +9,7 @@ import { NextFunction, Request, Response } from "express";
 export class AuthMiddleware {
 
 
-    static validateJWT = (req: Request, res: Response, next: NextFunction) => {
+    static validateJWT = async (req: Request, res: Response, next: NextFunction) => {
 
 
         const authorization = req.header('authorization');
@@ -19,9 +21,16 @@ export class AuthMiddleware {
 
         try {
             //todo
-            //const payload = JwtAdapter??
-             req.body = req.body || {}; // <-- evita Cannot set properties of undefined
-            (req.body as any).token = token;
+            const payload = await JwtAdapter.validateToken<{ id: string }>(token);
+            if (!payload) return res.status(401).json({ error: 'Invalid token provided' })
+
+            const user = await UserModel.findById(payload.id)
+
+            if (!user) return res.status(401).json({ error: 'invalid token - user notfound' })
+
+
+            req.body = req.body || {}; // <-- evita Cannot set properties of undefined
+            (req.body as any).user = user;
 
             //req.body.token = token
 
