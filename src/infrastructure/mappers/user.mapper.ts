@@ -21,8 +21,8 @@ export class UserMapper {
 
             return new UserEntity(
                 _id || id,
-                email,
                 name,
+                email,
                 password,
                 roles,
             );
