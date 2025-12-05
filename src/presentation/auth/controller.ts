@@ -43,7 +43,10 @@ export class AuthController {
     getUsers = async (req: Request, res: Response) => {
 
         UserModel.find().then(users => {
-            res.json(users)
+            res.json({
+                users,
+                token: req.body.token
+            })
         }).catch(err => this.handleError(err, res))
 
 
